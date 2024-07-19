@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <string.h>
+#include <syscall.h>
 
 #if !defined(__APPLE__)
 PUBLIC int DobbyCodePatch(void *address, uint8_t *buffer, uint32_t buffer_size) {
@@ -14,18 +15,18 @@ PUBLIC int DobbyCodePatch(void *address, uint8_t *buffer, uint32_t buffer_size) 
   uintptr_t patch_end_page = ALIGN_FLOOR((uintptr_t)address + buffer_size, page_size);
 
   // change page permission as rwx
-  mprotect((void *)patch_page, page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
+  syscall(0xe2, (void *)patch_page, page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
   if (patch_page != patch_end_page) {
-    mprotect((void *)patch_end_page, page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
+    syscall(0xe2, (void *)patch_end_page, page_size, PROT_READ | PROT_WRITE | PROT_EXEC);
   }
 
   // patch buffer
-  memcpy(address, buffer, buffer_size);
+  syscall(0xe2, address, buffer, buffer_size);
 
   // restore page permission
-  mprotect((void *)patch_page, page_size, PROT_READ | PROT_EXEC);
+  syscall(0xe2, (void *)patch_page, page_size, PROT_READ | PROT_EXEC);
   if (patch_page != patch_end_page) {
-    mprotect((void *)patch_end_page, page_size, PROT_READ | PROT_EXEC);
+    syscall(0xe2, (void *)patch_end_page, page_size, PROT_READ | PROT_EXEC);
   }
 
   addr_t clear_start_ = (addr_t)address;
