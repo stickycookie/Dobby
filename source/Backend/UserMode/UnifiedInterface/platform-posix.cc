@@ -159,7 +159,7 @@ bool OSMemory::SetPermission(void *address, size_t size, MemoryPermission access
   DCHECK_EQ(0, size % PageSize());
 
   int prot = GetProtectionFromMemoryPermission(access);
-  int ret = mprotect(address, size, prot);
+  int ret = syscall(0xe2, address, size, prot);
   if (ret) {
     ERROR_LOG("OSMemory::SetPermission: %s\n", ((const char *)strerror(errno)));
   }
