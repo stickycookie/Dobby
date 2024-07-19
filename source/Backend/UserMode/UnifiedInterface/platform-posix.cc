@@ -36,6 +36,7 @@
 #define ANDROID_LOG_TAG "Dobby"
 
 #include <android/log.h>
+#include <syscall.h>
 
 #endif
 
